@@ -1052,6 +1052,23 @@ class BetterPlayerController {
     return _overriddenFit ?? betterPlayerConfiguration.fit;
   }
 
+  /// Enable Picture in Picture (PiP) mode on pausing activity.
+  Future<void> enablePictureInPictureOnExit() async {
+    if(Platform.isIOS){
+     return; //todo
+    }
+    videoPlayerController!.enablePictureInPictureOnExit();
+  }
+
+  /// Disable Picture in Picture (PiP) mode on pausing activity.
+  Future<void> disablePictureInPictureOnExit() async {
+    if(Platform.isIOS){
+      return; //todo
+    }
+
+    videoPlayerController!.disablePictureInPictureOnExit();
+  }
+
   ///Enable Picture in Picture (PiP) mode. [betterPlayerGlobalKey] is required
   ///to open PiP mode in iOS. When device is not supported, PiP mode won't be
   ///open.

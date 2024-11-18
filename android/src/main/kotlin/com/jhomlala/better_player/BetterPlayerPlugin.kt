@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.util.LongSparseArray
+import android.util.Rational
 import com.jhomlala.better_player.BetterPlayerCache.releaseCache
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -198,7 +199,7 @@ class BetterPlayerPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
                 result.success(null)
             }
             IS_PICTURE_IN_PICTURE_SUPPORTED_METHOD -> result.success(
-                isPictureInPictureSupported()
+                isPictureInPictureSupported(player)
             )
             SET_AUDIO_TRACK_METHOD -> {
                 val name = call.argument<String?>(NAME_PARAMETER)
@@ -218,6 +219,16 @@ class BetterPlayerPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
             }
             DISPOSE_METHOD -> {
                 dispose(player, textureId)
+                result.success(null)
+            }
+            ENABLE_PICTURE_IN_PICTURE_ON_EXIT -> {
+                setPictureInPictureOnExit(true, player)
+                result.success(null)
+            }
+
+            DISABLE_PICTURE_IN_PICTURE_ON_EXIT -> {
+                setPictureInPictureOnExit(false, player)
+
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -401,7 +412,12 @@ class BetterPlayerPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
     }
 
 
-    private fun isPictureInPictureSupported(): Boolean {
+
+    private fun isPictureInPictureSupported(player: BetterPlayer): Boolean {
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && activity != null && activity!!.packageManager
+                .hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)) {
+            activity!!.setPictureInPictureParams(PictureInPictureParams.Builder().setAutoEnterEnabled(true).build())
+        }
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && activity != null && activity!!.packageManager
             .hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
     }
@@ -422,6 +438,16 @@ class BetterPlayerPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
         player.disposeMediaSession()
     }
 
+    private fun setPictureInPictureOnExit(b: Boolean, player: BetterPlayer) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            player.setupMediaSession(flutterState!!.applicationContext)
+            activity!!.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(
+                Rational(16, 9)
+            ).setAutoEnterEnabled(b).build())
+
+        }
+    }
+
     private fun startPictureInPictureListenerTimer(player: BetterPlayer) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             pipHandler = Handler(Looper.getMainLooper())
@@ -439,6 +465,12 @@ class BetterPlayerPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
     }
 
     private fun dispose(player: BetterPlayer, textureId: Long) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            player.setupMediaSession(flutterState!!.applicationContext)
+            activity!!.setPictureInPictureParams(PictureInPictureParams.Builder().setAspectRatio(
+                Rational(16, 9)
+            ).setAutoEnterEnabled(false).build())
+        }
         player.dispose()
         videoPlayers.remove(textureId)
         dataSources.remove(textureId)
@@ -545,5 +577,8 @@ class BetterPlayerPlugin : FlutterPlugin, ActivityAware, MethodCallHandler {
         private const val DISPOSE_METHOD = "dispose"
         private const val PRE_CACHE_METHOD = "preCache"
         private const val STOP_PRE_CACHE_METHOD = "stopPreCache"
+        private const val ENABLE_PICTURE_IN_PICTURE_ON_EXIT = "enablePictureInPictureOnExit"
+        private const val DISABLE_PICTURE_IN_PICTURE_ON_EXIT = "disablePictureInPictureOnExit"
+
     }
 }

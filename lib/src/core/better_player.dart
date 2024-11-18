@@ -78,6 +78,9 @@ class _BetterPlayerState extends State<BetterPlayer>
     }
     super.didChangeDependencies();
   }
+  updateState() {
+    setState(() {});
+  }
 
   Future<void> _setup() async {
     _controllerEventSubscription =

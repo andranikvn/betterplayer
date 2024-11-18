@@ -595,6 +595,12 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
         textureId, top, left, width, height);
   }
 
+  Future<void> enablePictureInPictureOnExit() {
+    return _videoPlayerPlatform.enablePictureInPictureOnExit(textureId);
+  }
+  Future<void> disablePictureInPictureOnExit() {
+    return _videoPlayerPlatform.disablePictureInPictureOnExit(textureId);
+  }
   Future<void> disablePictureInPicture() async {
     await _videoPlayerPlatform.disablePictureInPicture(textureId);
   }

@@ -152,6 +152,28 @@ class MethodChannelVideoPlayer extends VideoPlayerPlatform {
     );
   }
 
+
+  @override
+  Future<void> enablePictureInPictureOnExit(int? textureId) async {
+    return _channel.invokeMethod<void>(
+      'enablePictureInPictureOnExit',
+      <String, dynamic>{
+        'textureId': textureId,
+      },
+    );
+  }
+
+  @override
+  Future<void> disablePictureInPictureOnExit(int? textureId) async {
+    return _channel.invokeMethod<void>(
+      'disablePictureInPictureOnExit',
+      <String, dynamic>{
+        'textureId': textureId,
+      },
+    );
+  }
+
+
   @override
   Future<void> setVolume(int? textureId, double volume) {
     return _channel.invokeMethod<void>(
